@@ -41,5 +41,44 @@ class TestLeafNode(unittest.TestCase):
         print(node)
         self.assertEqual(node.to_html(), "Oh My Lord its Just Text.")
 
+
+class TestParentNode(unittest.TestCase):
+
+    ###ParentNode Tests
+
+    def test_no_tag(self):
+        print("Testing Parent Node w/ no Tag")
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode(None, [child_node])
+        self.assertRaisesRegex(ValueError, "Error: ParentNode must have a tag")
+
+    def test_to_html_with_children(self):
+        print("Testing Parent Node w/ No Children")
+        parent_node = ParentNode("div", [child_node])
+        self.assertRaisesRegex(ValueError, "Error: Child nodes missing")
+
+    def test_to_html_with_children(self):
+        print("Testing Parent Node w/ Children")
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+
+    def test_to_html_with_grandchildren(self):
+        print("Testing ParentNode w/ GrandChildren")
+        grandchild_node = LeafNode("b", "grandchild")
+        child_node = ParentNode("span", [grandchild_node])
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(),"<div><span><b>grandchild</b></span></div>")
+
+    def test_to_html_with_multidepth(self):
+        print("Testing ParentNode w/ Multidepth")
+        grandchild_node = LeafNode("b", "grandchild")
+        cousin_node = LeafNode("p", "cousin")
+        child_node = ParentNode("span", [grandchild_node])
+        parent_node = ParentNode("div", [child_node,cousin_node])
+        self.assertEqual(parent_node.to_html(),"<div><span><b>grandchild</b></span><p>cousin</p></div>") 
+
+
+
 if __name__ == "__main__":
     unittest.main()
