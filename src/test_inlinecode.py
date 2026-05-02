@@ -4,28 +4,26 @@ from functions import *
 from textnode import *
 from htmlnode import *
 
-
+###################################################################
+##########            Tests for Inline Code            ############
+###################################################################
 
 class TestSplitNodeDelimiter(unittest.TestCase):
     def test_code_split(self):
-       # print("Testing TextNode Split Function (1 Code Split).")
         node = TextNode("This is text with a `code block` word", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
-        #print(node,"\n","\n",new_nodes)
         self.assertEqual(new_nodes, [
         TextNode("This is text with a ", TextType.TEXT),
         TextNode("code block", TextType.CODE),
         TextNode(" word", TextType.TEXT),
         ])
     def test_multi_node(self):
-       # print("Testing Multi-Node splitting functionality.")
         nodes = [
         TextNode("This is text with a `code block` word", TextType.TEXT),
         TextNode("Oh Look, `Another code block` word already", TextType.TEXT),
         TextNode("This is already Code", TextType.CODE),
         ]
         new_nodes = split_nodes_delimiter(nodes,"`",TextType.CODE)
-        #print(nodes,"\n","\n",new_nodes)
         self.assertEqual(new_nodes, [
         TextNode("This is text with a ", TextType.TEXT),
         TextNode("code block", TextType.CODE),
@@ -192,6 +190,190 @@ class TestTextToTextNodes(unittest.TestCase):
             ],
             new_nodes,
         )
+
+######################################################################################
+#####################            Tests for Block Code            #####################
+######################################################################################
+
+class TestMarkdownBlocks(unittest.TestCase):
+    def test_markdown_to_blocks(self):
+        md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bolded** paragraph",
+                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+                "- This is a list\n- with items",
+            ],
+        )
+
+    def test_excessive_newlines_blocks(self):
+        md = """
+
+
+
+
+So theres way too many new lines in this mark down
+
+
+
+          There should only be two paragraph
+blocks accepted.           
+
+
+
+
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "So theres way too many new lines in this mark down",
+                "There should only be two paragraph\nblocks accepted."
+            ],
+        )
+
+    def test_no_blocks_found(self):
+        md = """
+
+
+
+
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,[],
+        )
+
+
+class TestBlockToBlockType(unittest.TestCase):
+    def test_para_block(self):
+        block = "This is just a simple paragraph"
+        b_type = block_to_block_type(block)
+        self.assertEqual(
+            b_type,
+            BlockType.PARA,
+        )
+
+    def test_heading1_block(self):
+        block = "# This is a heading block"
+        b_type = block_to_block_type(block)
+        self.assertEqual(
+            b_type,
+            BlockType.HEAD,
+        )
+    def test_heading2_block(self):
+        block = "## This is a heading block"
+        b_type = block_to_block_type(block)
+        self.assertEqual(
+            b_type,
+            BlockType.HEAD,
+        )
+    def test_heading3_block(self):
+        block = "### This is a heading block"
+        b_type = block_to_block_type(block)
+        self.assertEqual(
+            b_type,
+            BlockType.HEAD,
+        )
+    def test_heading4_block(self):
+        block = "#### This is a heading block"
+        b_type = block_to_block_type(block)
+        self.assertEqual(
+            b_type,
+            BlockType.HEAD,
+        )
+    def test_heading5_block(self):
+        block = "##### This is a heading block"
+        b_type = block_to_block_type(block)
+        self.assertEqual(
+            b_type,
+            BlockType.HEAD,
+        )
+    def test_heading6_block(self):
+        block = "###### This is a heading block"
+        b_type = block_to_block_type(block)
+        self.assertEqual(
+            b_type,
+            BlockType.HEAD,
+        )
+    def test_heading7_block(self):
+        block = "####### This is a heading block"
+        b_type = block_to_block_type(block)
+        self.assertNotEqual(
+            b_type,
+            BlockType.HEAD,
+        )
+
+    def test_code_block(self):
+        block = "```\nThis is a code block\nsecond line of code\nthird line of code```"
+        b_type = block_to_block_type(block)
+        self.assertEqual(
+            b_type,
+            BlockType.CODE,
+        )
+    def test_code_block_fail(self):
+        block = "`\nThis is a code block\nsecond line of code\nthird line of code`"
+        b_type = block_to_block_type(block)
+        self.assertNotEqual(
+            b_type,
+            BlockType.CODE,
+        )
+
+    def test_quote_block(self):
+        block = "> First Line of the Quote Block\n> Second Line\n> Third Line"
+        b_type = block_to_block_type(block)
+        self.assertEqual(
+            b_type,
+            BlockType.QUOTE
+        )
+    def test_quote_block_fail(self):
+        block = "> First Line of the Quote Block\n Second Line\n Third Line"
+        b_type = block_to_block_type(block)
+        self.assertNotEqual(
+            b_type,
+            BlockType.QUOTE
+        )
+
+    def test_unordered_list_block(self):
+        block = "- First Item on List\n- Second Item\n- Third Item"
+        b_type = block_to_block_type(block)
+        self.assertEqual(
+            b_type,
+            BlockType.UNLIST
+        )
+    def test_unordered_list_block_fail(self):
+        block = "- First Item on List\n Second Item\n Third Item"
+        b_type = block_to_block_type(block)
+        self.assertNotEqual(
+            b_type,
+            BlockType.UNLIST
+        )
+
+    def test_ordered_list_block(self):
+        block = "1. First Item on List\n2. Second Item\n3. Third Item"
+        b_type = block_to_block_type(block)
+        self.assertEqual(
+            b_type,
+            BlockType.ORDLIST
+        )
+    def test_ordered_list_block_fail(self):
+        block = "1. First Item on List\n2. Second Item\n5. Third Item"
+        b_type = block_to_block_type(block)
+        self.assertNotEqual(
+            b_type,
+            BlockType.ORDLIST
+        )
+
 
 
 if __name__ == "__main__":

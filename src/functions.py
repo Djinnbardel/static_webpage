@@ -1,8 +1,13 @@
 import re
 
+from enum import Enum
 from textnode import *
 from htmlnode import *
 
+
+#############################
+# Inline Markdown Functions #
+#############################
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
@@ -111,9 +116,87 @@ def split_nodes_images(old_nodes):
         new_nodes.extend(tempnodes)
     return new_nodes
 
-
 def text_to_textnodes(text):
-    nodes = split_nodes_links(split_nodes_images(split_nodes_delimiter(split_nodes_delimiter(split_nodes_delimiter([TextNode(text,TextType.TEXT)],'**',TextType.BOLD),'_',TextType.ITALIC),'`',TextType.CODE)))
+    nodes = split_nodes_links(
+        split_nodes_images(
+            split_nodes_delimiter(
+                split_nodes_delimiter(
+                    split_nodes_delimiter(
+                        [TextNode(text,TextType.TEXT)],
+                            '**',TextType.BOLD),
+                                '_',TextType.ITALIC),
+                                    '`',TextType.CODE)))
     return nodes
-    
-        
+
+
+####################
+# Block Type Enums #
+####################
+
+
+class BlockType(Enum):
+    PARA = "paragraph"
+    HEAD = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNLIST = "unordered_list"
+    ORDLIST = "ordered_list"
+
+
+############################
+# Block Markdown Functions #
+############################
+
+def markdown_to_blocks(markdown):
+    temp = markdown.split("\n\n")
+    blocks = []
+    for x in range(0,len(temp)):
+        if len(temp[x].strip()) == 0:
+            continue
+        else:
+            blocks.append(temp[x].strip())
+    return blocks
+
+def block_to_block_type(block):
+    if block.startswith(('# ','## ','### ','#### ','##### ','###### ')):
+        return BlockType.HEAD
+
+    if block.startswith('```\n') and block.endswith('```'):
+        return BlockType.CODE
+
+    if block.startswith('> '):
+        templines = block.split('\n')
+        counter = 0
+        while counter < len(templines):
+            if templines[counter].startswith('> '):
+                counter += 1
+            else:
+                break
+        if counter == len(templines):
+            return BlockType.QUOTE
+
+    if block.startswith('- '):
+        templines = block.split('\n')
+        counter = 0
+        while counter < len(templines):
+            if templines[counter].startswith('- '):
+                counter += 1
+            else:
+                break
+        if counter == len(templines):
+            return BlockType.UNLIST
+
+    if block.startswith('1. '):
+        templines = block.split('\n')
+        counter = 0
+        while counter < len(templines):
+            if templines[counter].startswith(f'{counter+1}. '):
+                counter += 1
+            else:
+                break
+        if counter == len(templines):
+            return BlockType.ORDLIST
+
+    return BlockType.PARA
+
+
