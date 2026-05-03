@@ -375,6 +375,93 @@ class TestBlockToBlockType(unittest.TestCase):
         )
 
 
+##################################################
+##########   TESTS FOR BLOCKS TO HTML   ##########
+##################################################
+
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )
+
+    def test_headings(self):
+        md = """
+# Heading 1
+
+## Heading 2
+
+### Heading 3
+
+#### Heading 4
+
+##### Heading 5
+
+###### Heading 6
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3><h4>Heading 4</h4><h5>Heading 5</h5><h6>Heading 6</h6></div>"
+        )
+
+    def test_all_blocks_test(self):
+        md = """
+### Heading Block (h3)
+
+This is **bold text** inside of a paragraph
+
+> Now we have
+> a _quote block_
+> to add
+
+- Unordered List 1
+- Unordered List 2
+
+1. Ordered List 1
+2. Ordered List 2
+
+```
+And _now_ we have some
+code to **finish** us out
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><h3>Heading Block (h3)</h3><p>This is <b>bold text</b> inside of a paragraph</p><blockquote>Now we have a <i>quote block</i> to add</blockquote><ul><li>Unordered List 1</li><li>Unordered List 2</li></ul><ol><li>Ordered List 1</li><li>Ordered List 2</li></ol><pre><code>And _now_ we have some\ncode to **finish** us out\n</code></pre></div>"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

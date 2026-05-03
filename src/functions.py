@@ -200,3 +200,69 @@ def block_to_block_type(block):
     return BlockType.PARA
 
 
+################################################
+############  Markdown to HTMLNode  ############
+################################################
+
+def text_to_children(text):
+    textnodes = text_to_textnodes(text)
+    children = []
+    for node in textnodes:
+        children.append(text_node_to_html_node(node))
+    return children
+
+def block_to_html_node(block):
+    b_type = block_to_block_type(block)
+    if b_type == BlockType.PARA:
+        text = block.replace('\n',' ')
+        children = text_to_children(text)
+        return ParentNode("p",children)
+
+    elif b_type == BlockType.HEAD:
+        h_num = block.count('#',0,block.find(' '))
+        try:
+            text = block[h_num + 1:]
+        except Exception:
+            raise ValueError("Error: Heading malformed.")
+        children = text_to_children(text)
+        return ParentNode(f"h{h_num}",children)
+
+    elif b_type == BlockType.QUOTE:
+        lines = block.split('\n')
+        cleaned = [line.removeprefix('>').lstrip() for line in lines]
+        text = " ".join(cleaned)
+        children = text_to_children(text)
+        return ParentNode("blockquote",children)
+    
+    elif b_type == BlockType.UNLIST:
+        lines = block.split('\n')
+        listed = []
+        for line in lines:
+            text = line.removeprefix('-').lstrip()
+            child = text_to_children(text)
+            listed.append(ParentNode("li",child))
+        return ParentNode("ul",listed)
+
+    elif b_type == BlockType.ORDLIST:
+        lines = block.split('\n')
+        listed = []
+        for line in lines:
+            text = line.split('. ', 1)
+            child = text_to_children(text[1])
+            listed.append(ParentNode("li",child))
+        return ParentNode("ol",listed)
+
+    elif b_type == BlockType.CODE:
+        code_node = TextNode(block.strip('`').lstrip(),TextType.CODE)
+        return ParentNode("pre",[text_node_to_html_node(code_node)])
+
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    main_node_children = []
+    for block in blocks:
+       main_node_children.append(block_to_html_node(block))
+    return ParentNode("div",main_node_children)
+       
+
+
