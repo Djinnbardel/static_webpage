@@ -462,6 +462,57 @@ code to **finish** us out
             "<div><h3>Heading Block (h3)</h3><p>This is <b>bold text</b> inside of a paragraph</p><blockquote>Now we have a <i>quote block</i> to add</blockquote><ul><li>Unordered List 1</li><li>Unordered List 2</li></ul><ol><li>Ordered List 1</li><li>Ordered List 2</li></ol><pre><code>And _now_ we have some\ncode to **finish** us out\n</code></pre></div>"
         )
 
+    def test_extract_title(self):
+        md = """
+# This is a Title  
+
+A test Paragraph
+"""
+        title = extract_title(md)
+        self.assertEqual(
+            title, "This is a Title"
+        )
+
+    def test_extract_title_missing(self):
+        md = """
+No Title to extract  
+
+A test Paragraph
+"""
+        
+        self.assertRaises(Exception,extract_title,md)
+
+    def test_extract_title_wrong_header(self):
+        md = """
+### Wrong Header  
+
+A test Paragraph
+"""
+        
+        self.assertRaises(Exception,extract_title,md)
+
+    def test_extract_title_no_markdown(self):
+        md = """
+
+
+
+"""
+        
+        self.assertRaises(Exception,extract_title,md)
+
+
+    def test_extract_title_text_before_title(self):
+        md = """
+A test Paragraph
+
+# This is a Title 
+"""
+        title = extract_title(md)
+        self.assertEqual(
+            title, "This is a Title"
+        )
+
+
 
 if __name__ == "__main__":
     unittest.main()

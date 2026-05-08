@@ -166,11 +166,11 @@ def block_to_block_type(block):
     if block.startswith('```\n') and block.endswith('```'):
         return BlockType.CODE
 
-    if block.startswith('> '):
+    if block.startswith('>'):
         templines = block.split('\n')
         counter = 0
         while counter < len(templines):
-            if templines[counter].startswith('> '):
+            if templines[counter].startswith('>'):
                 counter += 1
             else:
                 break
@@ -201,6 +201,12 @@ def block_to_block_type(block):
 
     return BlockType.PARA
 
+def extract_title(markdown):
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        if block.startswith("# "):
+            return block.lstrip("#").strip()
+    raise Exception("Error: No Title (h1) Header.")
 
 ################################################
 ############  Markdown to HTMLNode  ############
@@ -271,7 +277,7 @@ def markdown_to_html_node(markdown):
 #****           Website Functions            ****#
 #************************************************#
 
-def copy_files_over(source_dir,dest_dir):
+def copy_files_over(source_dir, dest_dir):
     if not os.path.exists(dest_dir):
         os.mkdir(dest_dir)
     src_list = os.listdir(source_dir)
@@ -282,6 +288,28 @@ def copy_files_over(source_dir,dest_dir):
             new_dir = os.path.join(dest_dir,item)
             os.mkdir(new_dir)
             copy_files_over(os.path.join(source_dir,item),new_dir)
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {dest_path}")
+    
+    with open(from_path,"r") as f:
+        from_file = f.read()
+    
+    with open(template_path,"r") as t:
+        template = t.read()
+   
+    htmlstring = markdown_to_html_node(from_file).to_html()
+    title = extract_title(from_file)
+    
+    new_html = template.replace("{{ Title }}",title).replace("{{ Content }}",htmlstring)
+    
+    os.makedirs(os.path.dirname(dest_path.split()[0]), exist_ok=True)
+    with open(dest_path,"w") as d:
+        d.write(new_html)
+    
+        
+    
+
 
 
 
