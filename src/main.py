@@ -1,10 +1,16 @@
 from textnode import *
+from functions import *
+from htmlnode import *
+import os
+import shutil
 
-print("hello world")
+#print("hello world")
 
 def main():
-    node = TextNode("This is a test", TextType.BOLD_TEXT)
-    print(node)
+    if os.path.exists("public"):
+        shutil.rmtree("public")
+    copy_files_over("static","public")
+
 
 main()
 

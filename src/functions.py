@@ -1,4 +1,6 @@
 import re
+import shutil
+import os
 
 from enum import Enum
 from textnode import *
@@ -264,5 +266,23 @@ def markdown_to_html_node(markdown):
        main_node_children.append(block_to_html_node(block))
     return ParentNode("div",main_node_children)
        
+
+#************************************************#
+#****           Website Functions            ****#
+#************************************************#
+
+def copy_files_over(source_dir,dest_dir):
+    if not os.path.exists(dest_dir):
+        os.mkdir(dest_dir)
+    src_list = os.listdir(source_dir)
+    for item in src_list:
+        if os.path.isfile(os.path.join(source_dir,item)):
+            shutil.copy(os.path.join(source_dir,item),dest_dir)
+        else:
+            new_dir = os.path.join(dest_dir,item)
+            os.mkdir(new_dir)
+            copy_files_over(os.path.join(source_dir,item),new_dir)
+
+
 
 
