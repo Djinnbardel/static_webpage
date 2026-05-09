@@ -290,7 +290,7 @@ def copy_files_over(source_dir, dest_dir):
             copy_files_over(os.path.join(source_dir,item),new_dir)
 
 def generate_page(from_path, template_path, dest_path):
-    print(f"Generating page from {from_path} to {dest_path} using {dest_path}")
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     
     with open(from_path,"r") as f:
         from_file = f.read()
@@ -303,11 +303,20 @@ def generate_page(from_path, template_path, dest_path):
     
     new_html = template.replace("{{ Title }}",title).replace("{{ Content }}",htmlstring)
     
-    os.makedirs(os.path.dirname(dest_path.split()[0]), exist_ok=True)
+    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     with open(dest_path,"w") as d:
         d.write(new_html)
-    
-        
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    dir_list = os.listdir(dir_path_content)
+    for file in dir_list:
+        fi_path = os.path.join(dir_path_content,file)
+        dest_path = os.path.join(dest_dir_path,file)
+        if os.path.isfile(fi_path) is False:
+            generate_pages_recursive(fi_path, template_path, dest_path)
+        else:
+            base, _ = os.path.splitext(dest_path)
+            generate_page(fi_path, template_path, f"{base}.html")
     
 
 

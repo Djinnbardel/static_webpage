@@ -10,9 +10,7 @@ def main():
     if os.path.exists("public"):
         shutil.rmtree("public")
     copy_files_over("static","public")
-    generate_page("content/index.md","template.html","public/index.html")
-    
-
+    generate_pages_recursive("content", "template.html","public")
 
 main()
 
