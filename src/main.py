@@ -10,10 +10,10 @@ import sys
 
 
 def main():
-    if sys.argv is None or sys.argv[0] == "src/main.py":
+    if sys.argv is None or len(sys.argv) < 2:
         basepath = "/"
     else:
-        basepath = sys.argv[0]
+        basepath = sys.argv[1]
     print(f"Basepath: {basepath}")
     if os.path.exists("docs"):
         shutil.rmtree("docs")
