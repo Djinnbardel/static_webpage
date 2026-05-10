@@ -289,7 +289,7 @@ def copy_files_over(source_dir, dest_dir):
             os.mkdir(new_dir)
             copy_files_over(os.path.join(source_dir,item),new_dir)
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(basepath, from_path, template_path, dest_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     
     with open(from_path,"r") as f:
@@ -301,22 +301,22 @@ def generate_page(from_path, template_path, dest_path):
     htmlstring = markdown_to_html_node(from_file).to_html()
     title = extract_title(from_file)
     
-    new_html = template.replace("{{ Title }}",title).replace("{{ Content }}",htmlstring)
+    new_html = ((template.replace("{{ Title }}",title).replace("{{ Content }}",htmlstring)).replace('href="/',f'href="{basepath}')).replace('src="/',f'src="{basepath}')
     
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     with open(dest_path,"w") as d:
         d.write(new_html)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(basepath, dir_path_content, template_path, dest_dir_path):
     dir_list = os.listdir(dir_path_content)
     for file in dir_list:
         fi_path = os.path.join(dir_path_content,file)
         dest_path = os.path.join(dest_dir_path,file)
         if os.path.isfile(fi_path) is False:
-            generate_pages_recursive(fi_path, template_path, dest_path)
+            generate_pages_recursive(basepath, fi_path, template_path, dest_path)
         else:
             base, _ = os.path.splitext(dest_path)
-            generate_page(fi_path, template_path, f"{base}.html")
+            generate_page(basepath, fi_path, template_path, f"{base}.html")
     
 
 
