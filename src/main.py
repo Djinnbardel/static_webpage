@@ -10,7 +10,7 @@ import sys
 
 
 def main():
-    if sys.argv is None or len(sys.argv) < 2:
+    if len(sys.argv) < 2:
         basepath = "/"
     else:
         basepath = sys.argv[1]
